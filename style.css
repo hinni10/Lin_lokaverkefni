@@ -1,0 +1,11 @@
+body {
+	font-family: 'Open Sans', sans-serif;
+	background-color:#e6f7ff;
+}
+
+h1 {
+	text-align: center;
+}
+img {
+	max-width: 640px;
+}

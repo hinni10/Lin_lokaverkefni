@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+  <link rel="stylesheet" href ="style.css" tylie="text/css">
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:600" rel="stylesheet">
+    <meta charset="UTF-8">
+    <title>Tutorial</title>
+  </head>
+  <body>
+  	<div class="row">
+  		<div id="part_01" class="col-md-offset-4 col-md-5">
+  		<ol>
+  			<h1>Tutorial - Lokaverkefni</h1>
+  			<br>
+  			<div>
+  				Við munum nota eftirfarandi útgáfur:<br>
+  				<ul>
+  				<li>Ubuntu Server 16.04.1</li>
+  				<li>Docker 1.12.1</li>
+  				<li>Apache 2.4.18</li>
+  				<li>Mysql 5.7.16</li>
+  				<li>phpMyAdmin 4.5.4.1</li>
+  				</ul><br><br>
+  			</div>
+  			<p>
+  				Fyrst þurfum við að setja upp Ubuntu server. 
+  			</p><br>
+  			<li>
+  				Sækjum nýjasta Ubuntu image-ið hérna: <a href="http://www.ubuntu.com/download/server">http://www.ubuntu.com/download/server</a>
+  			</li><br>
+  			<li>
+  				Þegar þú keyrir það þá kemur valkostur til að velja tungumál, veldu það sem hentar þér best.
+  			</li><br>
+  			<img src="myndir/01.png"/><br><br>
+  			<li>
+  				Svo veljum við "Install Ubuntu Server"
+  			</li><br>
+			<img src="myndir/02.png"/><br><br>
+			<li>
+				Svo kemur upp mjög einfaldur uppsetningar gluggi og þar þarf bara að velja allt rétt sem hentar þér best.
+			</li><br>
+			<i>Þegar það kemur að því að velja aukafítusa fyrir ubuntu (ssh, email server, lamp etc.) þá veljum við "LAMP server", "standard system utilities" og "OpenSSH server" og höldum svo áfram </i><br>
+			<img src="myndir/03.png"/><br><br>
+			<p>
+				Það næsta sem við gerum er að setja upp Docker, Apache, Mysql og phpMyAdmin.
+			</p><br>
+			<div class="code well">
+				<p>
+					sudo apt-get install docker.io<br>
+					sudo apt-get install apache2 <br>
+					sudo apt-get install mysql-server <br>
+					sudo /usr/bin/mysql_secure_installation<br>
+					sudo apt-get install phpmyadmin 
+				</p>
+			</div><br>
+			<li>Við búum svo til möppu fyrir síðuna okkar</li><br>
+
+			<div class="code well">
+				<p>
+					mkdir public-html
+				</p>
+			</div><br>
+			<li>
+				Við setjum upp Docker container fyrir síðuna okkar
+			</li><br>
+			<div class="code well">
+				<p>
+					docker pull httpd<br>
+					docker pull eboraas/apache<br>
+					docker run -p 80:80 -p 443:443 -v /home/user/mysite/:/var/www/html/ -d eboraas/apache
+				</p>
+			</div><br>
+			<li>
+				búum svo til skriptu sem býr til 15 notendur í mysql
+			</li><br>
+			<div class="code well">
+				<p>
+					touch mysqlskripta<br>
+					sudo chmod 777 mysqlskripta //Gefa leyfi til að nota skriptuna<br>
+					nano mysqlskripta //Til að geta breytt skriptunni
+				</p>
+			</div><br>
+			<i>
+				-uroot = -u + Þitt Root Username <br>
+				-proot = -p + Þitt Root Password
+			</i><br>
+			<div class="code well">
+				<p>
+					for i in {1..15}<br>
+					do<br>
+					&emsp;mysql -uroot -proot -e "CREATE USER 'notandi_$i'@'localhost' IDENTIFIED BY 'password_$i'"<br>
+					done
+				</p>
+			</div><br>
+			<li>
+				Núna þurfum við að búa til mysql töflu sem heitir "Logs"
+			</li><br>
+			<div class="code well">
+				<p>
+					mysql -u root -p //svo skrifaru inn passwordið þitt<br>
+					CREATE DATABASE lokaverkefni;<br>
+					USE lokaverkefni;<br>
+					CREATE TABLE IF NOT EXISTS Logs(<br>
+					&emsp;ID int(5) NOT NULL AUTO_INCREMENT,<br>
+					&emsp;Date Date DEFAULT NULL,<br>
+					&emsp;User varchar(20) DEFAULT NULL,<br>
+					&emsp;Memory varchar(20) DEFAULT NULL,<br>
+					&emsp;IP varchar(20) DEFAULT NULL,<br>
+					&emsp;Hostname varchar(20) DEFAULT NULL,<br>
+					&emsp;PRIMARY KEY(ID)<br>
+					);
+				</p>
+			</div><br>
+			<li>
+				Svo búum við til skriptu sem heitir 'logscript' sem við keyrum svo seinna með cron sem setur inn í mysql töfluna okkar
+			</li><br>
+			<div class="code well">
+				<p>
+					DATE="$(date +'%Y-%M-%D')"<br>
+					USERNAME=$USER<br>
+					MEMORY=grep MemTotal /proc/meminfo | awk '{print $2}' <br>
+					MYIP=ifconfig  | grep 'inet addr:'| grep -v '127.0.0.1' | cut -d: -f2 | awk '{ print $1}'<br>
+					MYHOSTNAME=$HOSTNAME<br><br>
+
+					mysql -uroot -proot USERNAME << EOF<br>
+					insert into Logs (Date,User,Memory,IP,Hostname) values '$DATE' , '$USERNAME', '$MEMORY' , '$MYIP' , '$MYHOSTNAME';<br>
+					EOF
+				</p>
+			</div><br>
+			<li>Við þurfum að láta skriptuna okkar keyrast klukkan 12 á hverjum degi.<br>
+			Til þess notum við cron.<br>
+			Skrifum í terminal: <i>"crontab -e"</i> til þess að opna cron fileinn.<br>
+			<br>
+			Svo setjum við cron skriptuna okkar neðst í cron fileinn.</li><br>
+			<div class="code well">
+				<p>
+					00 12 * * * root /.logscript
+				</p>
+			</div><br>
+  			</ol>
+  		</div>
+  	</div>
+  </body>
+</html>

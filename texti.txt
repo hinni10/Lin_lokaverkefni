@@ -1,0 +1,75 @@
+Fyrst þurfum við að setja upp Ubuntu server.
+Sækjum nýjasta Ubuntu image-ið hérna: http://www.ubuntu.com/download/server
+Þegar þú keyrir það þá kemur valkostur til að velja tungumál, veldu það sem hentar þér best.
+-mynd01-
+Svo veljum við "Install Ubuntu Server"
+-mynd02-
+Svo kemur upp mjög einfaldur uppsetningar gluggi og þar þarf bara að velja allt rétt sem hentar þér best.
+
+<i>Þegar það kemur að því að velja aukafítusa fyrir ubuntu (ssh, email server, lamp etc.) þá veljum við "LAMP server", "standard system utilities" og "OpenSSH server" og höldum svo áfram </i>
+-mynd03-
+
+Fyrsta sem við gerum er að setja upp Docker, Apache, Mysql og phpMyAdmin
+
+<code>
+sudo apt-get install docker.io
+sudo apt-get install apache2
+sudo apt-get install mysql-server 
+sudo /usr/bin/mysql_secure_installation
+sudo apt-get install phpmyadmin
+</code>
+
+mkdir public-html
+
+Við setjum upp Docker container fyrir síðuna okkar
+docker pull httpd
+docker pull eboraas/apache
+docker run -p 80:80 -p 443:443 -v /home/user/mysite/:/var/www/html/ -d eboraas/apache
+
+búum til skriptu sem býr til 15 notendur í mysql
+
+<code>
+touch mysqlskripta
+sudo chmod 777 mysqlskripta //Gefa leyfi til að nota skriptuna
+nano mysqlskripta //Til að geta breytt skriptunni
+</code>
+
+-uroot = -u + Root Username 
+-proot = -p + Root Password
+<code>
+for i in {1..15}
+do
+	mysql -uroot -proot -e "CREATE USER 'notandi_$1'@'localhost' IDENTIFIED BY 'password_$i'"
+done
+</code>
+
+Núna þurfum við að búa til mysql töflu sem heitir "Logs"
+<code>
+mysql -u root -p //svo skrifaru inn passwordið þitt
+CREATE DATABASE lokaverkefni;
+USE lokaverkefni;
+CREATE TABLE IF NOT EXISTS Logs(
+    ID int(5) NOT NULL AUTO_INCREMENT,
+    Date Date DEFAULT NULL,
+    User varchar(20) DEFAULT NULL,
+    Memory varchar(20) DEFAULT NULL,
+    IP varchar(20) DEFAULT NULL,
+    Hostname varchar(20) DEFAULT NULL,
+    PRIMARY KEY(ID)
+    );
+</code>
+
+<code>
+DATE="$(date +'%Y-%M-%D')"
+USERNAME=$USER
+MEMORY=grep MemTotal /proc/meminfo | awk '{print $2}' 
+MYIP=ifconfig  | grep 'inet addr:'| grep -v '127.0.0.1' | cut -d: -f2 | awk '{ print $1}'
+MYHOSTNAME=$HOSTNAME
+
+mysql -uroot -proot USERNAME << EOF
+insert into Logs (Date,User,Memory,IP,Hostname) values '$DATE' , '$USERNAME', '$MEMORY' , '$MYIP' , '$MYHOSTNAME';
+EOF
+</code>
+
+cron:
+00 12 * * * root /.logscripta
