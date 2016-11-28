@@ -76,15 +76,15 @@
 			</li><br>
 			<div class="code well">
 				<p>
-					touch mysqlskripta<br>
+					touch mysqlskripta //Búum til skriptuna<br>
 					sudo chmod 777 mysqlskripta //Gefa leyfi til að nota skriptuna<br>
 					nano mysqlskripta //Til að geta breytt skriptunni
 				</p>
 			</div><br>
 			<i>
-				-uroot = -u + Þitt Root Username <br>
-				-proot = -p + Þitt Root Password
-			</i><br>
+				-uroot</i> = -u + Þitt Root Username //ef root usernameið þitt er Kalli þá skrifaru '-uKalli' í staðinn fyrir '-uroot' <br><i>
+				-proot</i> = -p + Þitt Root Password //sama hér
+			<br>
 			<div class="code well">
 				<p>
 					for i in {1..15}<br>
@@ -117,6 +117,16 @@
 			</li><br>
 			<div class="code well">
 				<p>
+					touch logscript<br>
+					sudo chmod 777 logscript<br>
+					nano logscript
+				</p>
+			</div><br>
+			<p>
+				Og við skulum setja hana svona upp:
+			</p><br>
+			<div class="code well">
+				<p>
 					DATE="$(date +'%Y-%M-%D')"<br>
 					USERNAME=$USER<br>
 					MEMORY=grep MemTotal /proc/meminfo | awk '{print $2}' <br>
@@ -139,6 +149,7 @@
 				</p>
 			</div><br>
   			</ol>
+  			<h2>Til hamingju! Þú hefur klárað þennan tutorial og vonandi hefur hann hjálpað þér.</h2><br><br><br>
   		</div>
   	</div>
   </body>
