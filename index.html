@@ -154,16 +154,16 @@
   			<div class="well">
   			<h3>SQL Injection</h3>
   			<p>SQL Injections virka þannig að það er notað einhvern innsláttardálk til þess að rugla í kerfinu. Vefsíðan bíður þig um Notendanafn og Lykilorð og tekur svo það sem þú skrifar inn og ber það saman við skráða notendur í gangagrunninum. Ef þessi skipun er ekki rétt sett upp þá er hægt meðal annars að logga sig inn á notendur án þess að vita lykilorðið þeirra, það er hægt að breyta gagnagrunninum og eyða honum út. Venjuleg sql skipun til að skoða notendur er einhvernegin svona:<br> 
-SELECT * FROM Users WHERE Name ="Notendanafn" AND Pass ="Lykilorð"<br>
+<code>SELECT * FROM Users WHERE Name ="Notendanafn" AND Pass ="Lykilorð"<br></code>
 En hægt er að misnota þessa skipun með því loka og opna strenginn sem tekur inn í skipunina, t.d.:<br>
-Notendanafn verður þá:  " or ""="<br>
-Og lykilorð eitthvað svipað: " or ""="<br>
+Notendanafn verður þá: <code> " or ""="<br></code>
+Og lykilorð eitthvað svipað: <code> " or ""="<br> </code>
 Og þá verður skipunin svona: <br>
-SELECT * FROM Users WHERE Name ="" or ""="" AND Pass ="" or ""=""<br>
+<code>SELECT * FROM Users WHERE Name ="" or ""="" AND Pass ="" or ""=""<br></code>
 Sem verður alltaf satt og hleypir þér inn á síðuna<br>
-Eða notendanafn: Kalli; DROP TABLE Notendur<br>
+Eða notendanafn: <code> Kalli; DROP TABLE Notendur<br></code>
 Og þetta ætti að eyða töflunni notendur út :(
-Hægt er að forðast þetta með því að athuga alltaf hvað notandinn er að skrifa inn í dálkana og passa upp á að það séu bara réttir stafir notaðir<br>
+Hægt er að forðast þetta með því að athuga alltaf hvað notandinn er að skrifa inn í dálkana og passa upp á að það séu bara réttir stafir notaðir.<br>
 </p>
   			</div>
   		</div>
